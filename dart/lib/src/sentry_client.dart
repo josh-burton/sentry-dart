@@ -119,6 +119,8 @@ class SentryClient {
       return _sentryId;
     }
 
+    preparedEvent = _createUserOrSetDefaultIpAddress(preparedEvent);
+
     preparedEvent = await _runBeforeSend(
       preparedEvent,
       hint,
@@ -175,8 +177,6 @@ class SentryClient {
       sdk: event.sdk ?? _options.sdk,
       platform: event.platform ?? sdkPlatform(_options.platformChecker.isWeb),
     );
-
-    event = _createUserOrSetDefaultIpAddress(event);
 
     if (event is SentryTransaction) {
       return event;
@@ -484,8 +484,10 @@ class SentryClient {
   }
 
   bool _sampleRate() {
-    if (_options.sampleRate != null && _random != null) {
-      return (_options.sampleRate! < _random!.nextDouble());
+    final sampleRate = _options.sampleRate;
+    final random = _random;
+    if (sampleRate != null && random != null) {
+      return (sampleRate < random.nextDouble());
     }
     return false;
   }
